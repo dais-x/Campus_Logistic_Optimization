@@ -271,12 +271,3 @@ This project demonstrates key concepts including:
 
 ---
 
-# Future Improvements
-
-Potential improvements include:
-
-- demand forecasting using machine learning
-- vehicle routing optimization
-- multi-period logistics planning
-- stochastic demand modeling
-- real-time logistics dashboards

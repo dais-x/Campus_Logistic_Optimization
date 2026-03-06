@@ -1,7 +1,9 @@
 import pandas as pd
 import pulp
 import folium
-
+import plotly.express as px
+import plotly.figure_factory as ff
+import numpy as np
 # ---------------------------------------------------
 # 1 LOAD DATA
 # ---------------------------------------------------
@@ -188,3 +190,67 @@ for w, f, qty in shipments:
 m.save("logistics_network.html")
 
 print("Map saved as logistics_network.html")
+
+# ---------------------------------------------------
+# COST BREAKDOWN CHART
+# ---------------------------------------------------
+
+transport_total = sum(
+    transport_cost.get((w,f),0) * x[(w,f)].value()
+    for w in W for f in F
+)
+
+construction_total = sum(
+    construction[w] * y[w].value()
+    for w in W
+)
+
+operational_total = sum(
+    operational[w] * y[w].value()
+    for w in W
+)
+
+cost_df = pd.DataFrame({
+    "Cost Type": ["Transportation","Construction","Operational"],
+    "Cost":[transport_total,construction_total,operational_total]
+})
+
+fig_cost = px.bar(
+    cost_df,
+    x="Cost Type",
+    y="Cost",
+    text="Cost",
+    title="Annual Logistics Cost Breakdown",
+)
+
+fig_cost.show()
+
+
+# ---------------------------------------------------
+# SHIPMENT DISTRIBUTION HEATMAP
+# ---------------------------------------------------
+
+matrix = []
+
+for w in W:
+    row = []
+    for f in F:
+        value = x[(w,f)].value()
+        if value is None:
+            value = 0
+        row.append(value)
+    matrix.append(row)
+
+heatmap = ff.create_annotated_heatmap(
+    z=matrix,
+    x=F,
+    y=W,
+    colorscale="Viridis"
+)
+
+heatmap.update_layout(
+    title="Warehouse → Facility Shipment Distribution"
+)
+
+heatmap.show()
+
